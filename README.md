@@ -6,7 +6,7 @@ A production-ready Shopify app for creating dynamic product bundles with tiered 
 **✅ Market & geolocation pricing** – Automatically shows correct prices and currencies for international customers.  
 **✅ Flexible discount modes** – Percentage off, fixed price, amount off, or full price tiers.
 
-![Shopify Compatible](https://img.shields.io/badge/Shopify-Compatible-96bf48?logo=shopify) ![Remix](https://img.shields.io/badge/Remix-000000?logo=remix) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-000000?logo=rust)
+![Shopify Compatible](https://img.shields.io/badge/Shopify-Compatible-96bf48?logo=shopify) ![Remix](https://img.shields.io/badge/Remix-000000?logo=remix) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white) ![Rust](https://img.shields.io/badge/Rust-000000?logo=rust) ![License](https://img.shields.io/badge/License-MIT-green)
 
 ## 📸 Visual Preview
 
