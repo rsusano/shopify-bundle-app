@@ -1,0 +1,12 @@
+# Theme-check config at project root (used when checking extension files).
+# bundle-widget.js is ~23KB; default 10KB blocks deploy.
+AssetSizeAppBlockJavaScript:
+  threshold_in_bytes: 25000
+
+# ValidSchema uses theme-block rules; app blocks allow target, enabled_on, stylesheet, javascript.
+ValidSchema:
+  enabled: false
+
+# App blocks have a "block" object (block.settings); theme-check doesn't know it.
+UndefinedObject:
+  enabled: false
