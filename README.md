@@ -52,28 +52,65 @@ A production-ready Shopify app for creating dynamic product bundles with tiered 
 
 ## 🏗️ Architecture Flow
 
-```mermaid
-flowchart TD
-  subgraph A[Merchant Admin<br/>(Remix + Polaris UI)]
-    A1[Creates bundle with products + tiers]
-  end
-
-  subgraph B[PostgreSQL + Prisma<br/>+ Shopify Automatic Discount]
-    B1[Stores bundle configuration<br/>and syncs discount]
-  end
-
-  subgraph C[Shopify Discount Function (Rust)]
-    C1[Reads cart + bundle config<br/>Applies best tier discount]
-  end
-
-  subgraph D[Customer Storefront<br/>(Theme App Extension)]
-    D1[Shows bundle widget<br/>with tiered pricing]
-  end
-
-  A1 --> B1 --> C1 --> D1
+```text
+┌──────────────────────────────┐
+│ Customer clicks Add to cart │
+└───────────────┬─────────────┘
+                ▼
+        ┌──────────────────────┐
+        │   Who adds to cart?  │
+        └─────────┬────────────┘
+          ┌───────┴───────────────┐
+          ▼                       ▼
+  ┌──────────────────┐    ┌───────────────────┐
+  │ Theme form /     │    │ Bundle app (this  │
+  │ Quick add        │    │ app, e.g. Kaching)│
+  └────────┬─────────┘    └────────┬──────────┘
+           │                       │
+           ▼                       ▼
+  ┌──────────────────┐    ┌───────────────────┐
+  │ Theme adds via   │    │ App adds via API  │
+  │ fetch (cart API) │    └───────────────────┘
+  └────────┬─────────┘
+           │
+           ▼
+  ┌────────────────────────────────────────────┐
+  │ Dispatch `cart-drawer:open` or `cart:update` │
+  └─────────────────────────┬──────────────────┘
+                            ▼
+                 ┌──────────────────────┐
+                 │ Cart drawer script   │
+                 │ receives event       │
+                 └─────────┬────────────┘
+                           ▼
+                 ┌──────────────────────┐
+                 │      Open dialog     │
+                 └─────────┬────────────┘
+                           ▼
+                 ┌──────────────────────┐
+                 │ Section HTML in      │
+                 │ event? (Yes / No)    │
+                 └─────────┬────────────┘
+                     Yes   │    No
+                           ▼
+                 ┌──────────────────────┐
+                 │ Fetch section via    │
+                 │ Section Rendering API│
+                 └─────────┬────────────┘
+                           ▼
+                 ┌──────────────────────┐
+                 │ Replace drawer       │
+                 │ content with HTML    │
+                 └─────────┬────────────┘
+                           ▼
+                 ┌──────────────────────┐
+                 │ Drawer shows updated │
+                 │ cart; customer can   │
+                 │ review and checkout  │
+                 └──────────────────────┘
 ```
 
-**Summary**: Merchant creates bundle → Database stores config → Discount function applies at checkout → Widget shows tiers on storefront. No theme-specific code required.
+**Summary**: Customer clicks add to cart → either the theme form, your bundle app, or a subscription app adds lines → cart drawer updates using the section rendering API → customer sees the updated cart and can checkout.
 
 ## 📦 What's Included
 
