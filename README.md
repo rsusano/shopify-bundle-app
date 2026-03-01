@@ -52,65 +52,9 @@ A production-ready Shopify app for creating dynamic product bundles with tiered 
 
 ## 🏗️ Architecture Flow
 
-```text
-┌──────────────────────────────┐
-│ Customer clicks Add to cart │
-└───────────────┬─────────────┘
-                ▼
-        ┌──────────────────────┐
-        │   Who adds to cart?  │
-        └─────────┬────────────┘
-          ┌───────┴───────────────┐
-          ▼                       ▼
-  ┌──────────────────┐    ┌───────────────────┐
-  │ Theme form /     │    │ Bundle app (this  │
-  │ Quick add        │    │ app, e.g. Kaching)│
-  └────────┬─────────┘    └────────┬──────────┘
-           │                       │
-           ▼                       ▼
-  ┌──────────────────┐    ┌───────────────────┐
-  │ Theme adds via   │    │ App adds via API  │
-  │ fetch (cart API) │    └───────────────────┘
-  └────────┬─────────┘
-           │
-           ▼
-  ┌────────────────────────────────────────────┐
-  │ Dispatch `cart-drawer:open` or `cart:update` │
-  └─────────────────────────┬──────────────────┘
-                            ▼
-                 ┌──────────────────────┐
-                 │ Cart drawer script   │
-                 │ receives event       │
-                 └─────────┬────────────┘
-                           ▼
-                 ┌──────────────────────┐
-                 │      Open dialog     │
-                 └─────────┬────────────┘
-                           ▼
-                 ┌──────────────────────┐
-                 │ Section HTML in      │
-                 │ event? (Yes / No)    │
-                 └─────────┬────────────┘
-                     Yes   │    No
-                           ▼
-                 ┌──────────────────────┐
-                 │ Fetch section via    │
-                 │ Section Rendering API│
-                 └─────────┬────────────┘
-                           ▼
-                 ┌──────────────────────┐
-                 │ Replace drawer       │
-                 │ content with HTML    │
-                 └─────────┬────────────┘
-                           ▼
-                 ┌──────────────────────┐
-                 │ Drawer shows updated │
-                 │ cart; customer can   │
-                 │ review and checkout  │
-                 └──────────────────────┘
-```
+![Architecture Flow](docs/architecture-flow.png)
 
-**Summary**: Customer clicks add to cart → either the theme form, your bundle app, or a subscription app adds lines → cart drawer updates using the section rendering API → customer sees the updated cart and can checkout.
+**Summary**: Merchant configures bundles in the admin → database stores config and syncs Shopify discounts → Rust discount function applies the best tier at checkout → theme app extension shows bundle tiers on the storefront.
 
 ## 📦 What's Included
 
