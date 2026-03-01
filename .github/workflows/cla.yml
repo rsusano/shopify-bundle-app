@@ -1,10 +1,9 @@
 name: Contributor License Agreement (CLA)
 
+# Disabled: Only needed for repos accepting external contributions with CLA requirements.
+# This workflow requires a CLA_TOKEN secret which is not configured.
 on:
-  pull_request_target:
-    types: [opened, synchronize]
-  issue_comment:
-    types: [created]
+  workflow_dispatch:
 
 jobs:
   cla:
