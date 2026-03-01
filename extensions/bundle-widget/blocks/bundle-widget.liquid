@@ -1,0 +1,84 @@
+{% comment %}
+  theme-check-disable ValidSchema
+  theme-check-disable UndefinedObject
+  Bundle Widget – theme app block. `block` is provided by Shopify for app blocks.
+  Passes country/currency context to app proxy for Markets/Geolocation pricing.
+{% endcomment %}
+{% if localization.country %}
+  {% assign customer_country = localization.country.iso_code %}
+{% else %}
+  {% assign customer_country = 'US' %}
+{% endif %}
+{% assign shop_currency = shop.currency %}
+{% if cart.currency %}
+  {% assign cart_currency = cart.currency.iso_code %}
+{% else %}
+  {% assign cart_currency = shop.currency %}
+{% endif %}
+
+<div id="bundle-widget" class="bundle-widget"
+     data-bundle-id="{{ block.settings.bundle_key | escape }}"
+     data-product-id="{% if product %}{{ product.id | escape }}{% endif %}"
+     data-country="{{ customer_country }}"
+     data-currency="{{ shop_currency }}"
+     data-presentment-currency="{{ cart_currency }}">
+  <div class="bundle-widget__header">
+    <h3 class="bundle-widget__title">{{ block.settings.heading | default: 'Bundle & Save' }}</h3>
+  </div>
+  <div class="bundle-widget__content">
+    <p class="bundle-widget__message bundle-widget__loading">{{ block.settings.message | default: 'Loading bundle...' }}</p>
+    <div class="bundle-widget__dynamic" hidden></div>
+  </div>
+</div>
+{% comment %} JS loaded via schema "javascript" below (app block loads from extension assets) {% endcomment %}
+
+{% # theme-check-disable AssetSizeAppBlockJavaScript %}
+{% schema %}
+{
+  "name": "Bundle Widget",
+  "target": "section",
+  "enabled_on": {
+    "templates": ["product", "index"]
+  },
+  "stylesheet": "bundle-widget.css",
+  "javascript": "bundle-widget.js",
+  "settings": [
+    {
+      "type": "text",
+      "id": "bundle_key",
+      "label": "Bundle ID",
+      "info": "Optional. Enter the bundle ID from your app to load live tiers (requires app proxy)."
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Bundle & Save"
+    },
+    {
+      "type": "textarea",
+      "id": "message",
+      "label": "Message",
+      "default": "Add multiple items to your cart to unlock tiered discounts."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tiers",
+      "label": "Show tier examples",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "tier_1",
+      "label": "Tier 1 text",
+      "default": "Buy 2+ → 10% off"
+    },
+    {
+      "type": "text",
+      "id": "tier_2",
+      "label": "Tier 2 text",
+      "default": "Buy 3+ → 15% off"
+    }
+  ]
+}
+{% endschema %}

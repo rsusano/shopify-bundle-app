@@ -1,10 +1,9 @@
 name: Create Javascript conversion PR
 
+# This workflow is only needed in the original template repo to maintain a
+# separate Javascript branch. For this project we disable it on push so it
+# no longer blocks CI. You can still run it manually from the Actions tab.
 on:
-  push:
-    branches:
-      - main
-
   workflow_dispatch:
 
 jobs:

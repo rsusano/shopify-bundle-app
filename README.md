@@ -52,35 +52,25 @@ A production-ready Shopify app for creating dynamic product bundles with tiered 
 
 ## 🏗️ Architecture Flow
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     MERCHANT ADMIN                           │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Creates bundle with products + tiers                │   │
-│  │  (Remix app with Polaris UI)                         │   │
-│  └────────────────┬─────────────────────────────────────┘   │
-│                   ▼                                          │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  PostgreSQL Database (Prisma ORM)                    │   │
-│  │  Syncs to Shopify Automatic Discount                 │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│              SHOPIFY DISCOUNT FUNCTION (Rust)                │
-│  Reads cart → Matches bundle products → Applies discount    │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                  CUSTOMER STOREFRONT                         │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │  Theme App Extension (Liquid + JavaScript)           │   │
-│  │  Fetches bundle via app proxy                        │   │
-│  │  Shows tiered pricing with real-time calculations    │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+  subgraph A[Merchant Admin<br/>(Remix + Polaris UI)]
+    A1[Creates bundle with products + tiers]
+  end
+
+  subgraph B[PostgreSQL + Prisma<br/>+ Shopify Automatic Discount]
+    B1[Stores bundle configuration<br/>and syncs discount]
+  end
+
+  subgraph C[Shopify Discount Function (Rust)]
+    C1[Reads cart + bundle config<br/>Applies best tier discount]
+  end
+
+  subgraph D[Customer Storefront<br/>(Theme App Extension)]
+    D1[Shows bundle widget<br/>with tiered pricing]
+  end
+
+  A1 --> B1 --> C1 --> D1
 ```
 
 **Summary**: Merchant creates bundle → Database stores config → Discount function applies at checkout → Widget shows tiers on storefront. No theme-specific code required.

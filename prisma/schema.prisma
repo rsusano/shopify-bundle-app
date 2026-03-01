@@ -1,0 +1,123 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// PostgreSQL – set DATABASE_URL in .env (e.g. from Shopify or your own Postgres)
+// See https://www.prisma.io/docs/orm/reference/prisma-schema-reference#string for more information
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}
+
+// --- Shop: store config for Markets, geolocation, currency ---
+model Shop {
+  id                 String   @id @default(cuid())
+  shopId             String   @unique // myshopify.com domain
+  baseCurrency       String   @default("USD")
+  enabledMarkets     Json?    // [{ id, name, currencyCode }]
+  geolocationEnabled Boolean  @default(false)
+  isoCurrencyDisplay Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+// --- Bundle widget: bundles, products, bars (tiers), and legacy tiers ---
+model Bundle {
+  id                  String   @id @default(cuid())
+  shop                String
+  name                String
+  status              String   @default("draft") // "draft" | "active" | "published"
+  type                String   @default("quantity_breaks") // "same_product" | "bogo" | "multi_product"
+  useMarketPricing    Boolean  @default(true)
+  baseCurrency        String   @default("USD")
+  priceConversionMode String   @default("auto")
+  pricingRules        Json?    // type-specific: { buyQuantity, getFreeQuantity } for bogo, etc.
+  visibilitySettings  Json?
+  marketSettings      Json?
+  featureToggles      Json?    // { countdownTimer, stickyAddToCart, lowStockAlert, ... }
+  startDate           DateTime?
+  endDate             DateTime?
+  shopifyDiscountId   String?  // Shopify automatic discount ID when active
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  products            BundleProduct[]
+  tiers               BundleTier[] // legacy; bars preferred
+  bars                Bar[]
+}
+
+// --- Bar: configurable tier (replaces BundleTier for new bundles) ---
+model Bar {
+  id              String   @id @default(cuid())
+  bundleId        String
+  bundle          Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  label           String?  // "Buy 2, Get 1 FREE"
+  quantity        Int      // min quantity for tier
+  discountType    String   @default("percentage") // "percentage" | "fixed_amount" | "fixed_price"
+  discountValue   Float?   // % or fixed amount
+  fixedPrice      String?  // for fixed_price type
+  isMostPopular   Boolean  @default(false)
+  customBadge     String?  // "Free Shipping", "Best Value"
+  productsIncluded Json?  // for multi-product: product IDs in this bar
+  position        Int      @default(0)
+  createdAt       DateTime @default(now())
+  @@index([bundleId])
+}
+
+model BundleProduct {
+  id        String   @id @default(cuid())
+  bundleId  String
+  bundle   Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  productId String  // Shopify product GID, e.g. gid://shopify/Product/123
+  position  Int     @default(0)
+  @@unique([bundleId, productId])
+}
+
+model BundleTier {
+  id                  String   @id @default(cuid())
+  bundleId            String
+  bundle              Bundle   @relation(fields: [bundleId], references: [id], onDelete: Cascade)
+  minQuantity         Int      // e.g. 2 = "Buy 2 or more"
+  discountPercent     Float    // e.g. 10 = 10% off (for volume discount)
+  label               String?  // optional e.g. "Buy 2, Get 1 FREE"
+  badgeLabel          String?  // optional e.g. "Most Popular", "Free Shipping"
+  highlight           Boolean  @default(false)
+  // Kaching-style bar settings
+  title               String?  // e.g. "Single", "Duo"
+  subtitle            String?  // e.g. "Standard price"
+  priceType           String   @default("percentage") // full_price | percentage_off | amount_off | fixed_price
+  discountValue       Float?   // for percentage_off (e.g. 10) or amount_off (e.g. 5.00)
+  fixedPrice          String?  // for fixed_price type (total for bar)
+  badgeStyle          String?  @default("simple") // simple | most_popular
+  selectedByDefault   Boolean  @default(false)
+  showQuantitySelector Boolean @default(false)
+  showAsSoldOut       Boolean  @default(false)
+  imageUrl            String?
+  imageSize           Int?     @default(48)
+  imageCornerRadius   Int?     @default(6)
+  barSettings         Json?    // upsell, personalisation, freeGift config
+  createdAt           DateTime @default(now())
+  @@index([bundleId])
+}
