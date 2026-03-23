@@ -12,6 +12,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Schema positioning note:
+// Keep `generator` + `datasource` at the top, and define `model` blocks below.
+// Ordering of models does not affect runtime, but helps keep the file maintainable.
+
 model Session {
   id                  String    @id
   shop                String
